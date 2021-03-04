@@ -1,29 +1,28 @@
+import file.FileController;
+import layout.MainLayout;
+import parser.Parser;
+import request.RequestController;
+
 import javax.swing.*;
-import java.util.Map;
 
 public class Runner {
 
     public static void main(String[] args) {
-        JFrame jFrame = new JFrame("FRAME");
-        JPanel jPanel = new JPanel();
-        JButton button = new JButton("TExt");
-        button.addActionListener(e -> {
-            Map<String, Object> map = Runner2.loadData("IBM");
-            Runner2.loadLayout(jPanel, map);
-            jPanel.repaint();
-            jFrame.repaint();
-        });
-        JTextField textField = new JTextField("DSAssad");
-        jPanel.add(button);
-        jPanel.add(textField);
-        jPanel.setVisible(true);
-        jFrame.add(jPanel);
-        jFrame.setVisible(true);
+        init();
+    }
 
-//        AlphaVantageAPI api = new AlphaVantageAPI();
-//        RequestHandler requestHandler = new RequestHandler(api, "IBM", 2015, 2020);
-//        String[] financialData = requestHandler.requestFinancialData();
-//        Parser parser = new Parser(financialData);
-//        parser.parse();
+    public static void init() {
+        MainLayout mainLayout = createMainLayout();
+        JFrame frame = new JFrame();
+        frame.setSize(700, 500);
+        frame.add(mainLayout);
+        frame.setVisible(true);
+    }
+
+    public static MainLayout createMainLayout() {
+        RequestController requestController = new RequestController();
+        FileController fileController = new FileController();
+        Parser parserController = new Parser();
+        return new MainLayout(requestController, fileController, parserController);
     }
 }
