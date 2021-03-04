@@ -4,6 +4,8 @@ import file.FileController;
 import parser.ParsingController;
 import request.RequestController;
 
+import javax.swing.*;
+import java.util.HashSet;
 import java.util.Optional;
 
 public class MainLayout extends Layout {
@@ -19,7 +21,7 @@ public class MainLayout extends Layout {
         init();
     }
 
-    public void init() {
+    private void init() {
         filePathButton.addActionListener(e -> {
             fileController.updatePath(filePathField.getText());
         });
@@ -29,11 +31,19 @@ public class MainLayout extends Layout {
             requestController.updateApiKey(apiKeyField.getText());
             Optional<String> jsonString = requestController.runQuery();
             jsonString.ifPresent(parsingController::updateJsonString);
+
+            HashSet<String> keySet = parsingController.parse();
+            if(!keySet.isEmpty()) {
+                for(String key: keySet) {
+                    keysPanel.add(new JCheckBox(key, false));
+                }
+                keysPanel.repaint();
+                this.repaint();
+            }
         });
 
         magicButton.addActionListener(e -> {
-            parsingController.parse();
-            //TODO after receiving the parsed Map, display key-set for selection
+            //TODO here create CSV table using selected keys
         });
     }
 }

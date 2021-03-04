@@ -32,7 +32,8 @@ public class RequestController {
 
     private Optional<String> requestData() {
         HttpHandler httpHandler = new HttpHandler();
-        String httpResponse = httpHandler.makeServiceCall("");
+        String httpResponse = httpHandler
+                .makeServiceCall("https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + symbol + "&apikey=" + apiKey);
         return (httpResponse == null ? Optional.empty() : Optional.of(httpResponse));
     }
 }

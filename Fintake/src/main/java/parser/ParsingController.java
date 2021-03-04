@@ -1,5 +1,11 @@
 package parser;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class ParsingController {
@@ -10,17 +16,18 @@ public class ParsingController {
         this.json = "";
     }
 
-    public Map<String, Object> parse() {
-        //TODO parsing to a Map<String, Object>
-        return null;
+    public HashSet<String> parse() {
+        if(json.isEmpty()) {
+            return new HashSet<>();
+        } else {
+            StringReader reader = new StringReader(json);
+            JSONTokener jsonTokener = new JSONTokener(reader);
+            JSONObject jsonObject = new JSONObject(jsonTokener);
+            return (HashSet<String>) jsonObject.toMap().keySet();
+        }
     }
 
     public void updateJsonString(String json) {
         this.json = json;
     }
-
-//            StringReader reader = new StringReader(json);
-//            JSONTokener jsonTokener = new JSONTokener(reader);
-//            JSONObject jsonObject = new JSONObject(jsonTokener);
-
 }
