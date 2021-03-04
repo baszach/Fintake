@@ -4,7 +4,7 @@ import http.HttpHandler;
 
 import java.util.Optional;
 
-public class RequestController implements RequestCommunicator {
+public class RequestController {
 
     private String symbol;
     private String apiKey;

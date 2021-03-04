@@ -2,11 +2,11 @@ package parser;
 
 import java.util.Map;
 
-public class Parser implements ParsingCommunicator {
+public class ParsingController {
 
     private String json;
 
-    public Parser() {
+    public ParsingController() {
         this.json = "";
     }
 

@@ -1,6 +1,6 @@
 package file;
 
-public class FileController implements FileCommunicator {
+public class FileController {
 
     private String filePath;
 

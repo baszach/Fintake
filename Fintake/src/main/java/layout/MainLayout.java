@@ -1,38 +1,38 @@
 package layout;
 
-import file.FileCommunicator;
-import parser.ParsingCommunicator;
-import request.RequestCommunicator;
+import file.FileController;
+import parser.ParsingController;
+import request.RequestController;
 
 import java.util.Optional;
 
 public class MainLayout extends Layout {
 
-    private final RequestCommunicator requestCommunicator;
-    private final FileCommunicator fileCommunicator;
-    private final ParsingCommunicator parsingCommunicator;
+    private final RequestController requestController;
+    private final FileController fileController;
+    private final ParsingController parsingController;
 
-    public MainLayout(RequestCommunicator requestCommunicator, FileCommunicator fileCommunicator, ParsingCommunicator parsingCommunicator) {
-        this.requestCommunicator = requestCommunicator;
-        this.fileCommunicator = fileCommunicator;
-        this.parsingCommunicator = parsingCommunicator;
+    public MainLayout() {
+        this.requestController = new RequestController();
+        this.fileController = new FileController();
+        this.parsingController = new ParsingController();
         init();
     }
 
     public void init() {
         filePathButton.addActionListener(e -> {
-            fileCommunicator.updatePath(filePathField.getText());
+            fileController.updatePath(filePathField.getText());
         });
 
         queryButton.addActionListener(e -> {
-            requestCommunicator.updateSymbol(symbolField.getText());
-            requestCommunicator.updateApiKey(apiKeyField.getText());
-            Optional<String> jsonString = requestCommunicator.runQuery();
-            jsonString.ifPresent(parsingCommunicator::updateJsonString);
+            requestController.updateSymbol(symbolField.getText());
+            requestController.updateApiKey(apiKeyField.getText());
+            Optional<String> jsonString = requestController.runQuery();
+            jsonString.ifPresent(parsingController::updateJsonString);
         });
 
         magicButton.addActionListener(e -> {
-            parsingCommunicator.parse();
+            parsingController.parse();
             //TODO after receiving the parsed Map, display key-set for selection
         });
     }
