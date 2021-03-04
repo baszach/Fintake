@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ParsingController {
 
@@ -16,14 +17,14 @@ public class ParsingController {
         this.json = "";
     }
 
-    public HashSet<String> parse() {
+    public Set<String> parse() {
         if(json.isEmpty()) {
             return new HashSet<>();
         } else {
             StringReader reader = new StringReader(json);
             JSONTokener jsonTokener = new JSONTokener(reader);
             JSONObject jsonObject = new JSONObject(jsonTokener);
-            return (HashSet<String>) jsonObject.toMap().keySet();
+            return jsonObject.toMap().keySet();
         }
     }
 

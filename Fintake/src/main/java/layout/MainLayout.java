@@ -5,8 +5,8 @@ import parser.ParsingController;
 import request.RequestController;
 
 import javax.swing.*;
-import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class MainLayout extends Layout {
 
@@ -27,23 +27,34 @@ public class MainLayout extends Layout {
         });
 
         queryButton.addActionListener(e -> {
-            requestController.updateSymbol(symbolField.getText());
-            requestController.updateApiKey(apiKeyField.getText());
-            Optional<String> jsonString = requestController.runQuery();
-            jsonString.ifPresent(parsingController::updateJsonString);
-
-            HashSet<String> keySet = parsingController.parse();
-            if(!keySet.isEmpty()) {
-                for(String key: keySet) {
-                    keysPanel.add(new JCheckBox(key, false));
-                }
-                keysPanel.repaint();
-                this.repaint();
-            }
+            startQuery();
+            displayKeysForSelection();
         });
 
         magicButton.addActionListener(e -> {
             //TODO here create CSV table using selected keys
         });
+    }
+
+    private void startQuery() {
+        requestController.updateSymbol(symbolField.getText());
+        requestController.updateApiKey(apiKeyField.getText());
+        Optional<String> jsonString = requestController.runQuery();
+        jsonString.ifPresent(parsingController::updateJsonString);
+    }
+
+    private void displayKeysForSelection() {
+        Set<String> keySet = parsingController.parse();
+        if(!keySet.isEmpty()) {
+            int index = 0;
+            for(String key: keySet) {
+                java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 0;
+                gridBagConstraints.gridy = index++;
+                keysPanel.add(new JCheckBox(key), gridBagConstraints);
+            }
+            keysPanel.repaint();
+            this.repaint();
+        }
     }
 }
