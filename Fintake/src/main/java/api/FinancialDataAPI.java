@@ -2,5 +2,5 @@ package api;
 
 public interface FinancialDataAPI {
 
-    String[] serveFinancialData(String symbol, int fromDate, int toDate);
+    String[] createRequestUrls(String symbol, String apiKey);
 }

@@ -1,50 +1,70 @@
 package layout;
 
-import file.FileController;
-import parser.ParsingController;
-import request.RequestController;
+import api.ApiController;
+import http.QueryHandler;
+import parser.JsonParser;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 public class MainLayout extends Layout {
 
-    private final RequestController requestController;
-    private final FileController fileController;
-    private final ParsingController parsingController;
+    private ApiController apiController;
+    private JsonParser jsonParser;
 
     public MainLayout() {
-        this.requestController = new RequestController();
-        this.fileController = new FileController();
-        this.parsingController = new ParsingController();
+        preloadConfigs();
         init();
     }
 
+    private void preloadConfigs() {
+        File configsDir = new File("configs");
+        if(configsDir.isDirectory()) {
+            for(String file: configsDir.list())  {
+                //TODO
+            }
+        }
+    }
+
     private void init() {
+        this.apiController = new ApiController();
+        this.jsonParser = new JsonParser();
+
         filePathButton.addActionListener(e -> {
-            fileController.updatePath(filePathField.getText());
+
         });
 
         queryButton.addActionListener(e -> {
-            startQuery();
-            displayKeysForSelection();
+            if(startQuery()) {
+                displayKeysForSelection();
+            }
         });
 
         magicButton.addActionListener(e -> {
+            Set<String> keys = getSelectedKeys();
             //TODO here create CSV table using selected keys
         });
     }
 
-    private void startQuery() {
-        requestController.updateSymbol(symbolField.getText());
-        requestController.updateApiKey(apiKeyField.getText());
-        Optional<String> jsonString = requestController.runQuery();
-        jsonString.ifPresent(parsingController::updateJsonString);
+    private boolean startQuery() {
+        apiController.updateSymbol(symbolField.getText());
+        apiController.updateApiKey(apiKeyField.getText());
+        apiController.updateApi("alpha");
+        Optional<String[]> urls = apiController.getRequestUrls();
+        if(urls.isPresent()) {
+            QueryHandler queryHandler = new QueryHandler(urls.get());
+            jsonParser.updateJsons(queryHandler.requestData());
+            return true;
+        }
+        return false;
     }
 
     private void displayKeysForSelection() {
-        Set<String> keySet = parsingController.parse();
+        Set<String> keySet = jsonParser.jsonsToMap().keySet();
         if(!keySet.isEmpty()) {
             int index = 0;
             for(String key: keySet) {
@@ -56,5 +76,19 @@ public class MainLayout extends Layout {
             keysPanel.repaint();
             this.repaint();
         }
+    }
+
+    private Set<String> getSelectedKeys() {
+        Set<String> keys = new HashSet<>();
+        for(int i = 0; i < keysPanel.getComponentCount(); i++) {
+            Component c = keysPanel.getComponent(i);
+            if(c instanceof JCheckBox) {
+                JCheckBox b = (JCheckBox) c;
+                if (b.isSelected()) {
+                    keys.add(b.getText());
+                }
+            }
+        }
+        return keys;
     }
 }
