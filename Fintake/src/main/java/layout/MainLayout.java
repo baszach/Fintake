@@ -1,12 +1,19 @@
 package layout;
 
 import api.ApiController;
+import file.ConfigFileUtils;
 import http.QueryHandler;
 import parser.JsonParser;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -17,23 +24,31 @@ public class MainLayout extends Layout {
     private JsonParser jsonParser;
 
     public MainLayout() {
-        preloadConfigs();
         init();
-    }
-
-    private void preloadConfigs() {
-        File configsDir = new File("configs");
-        if(configsDir.isDirectory()) {
-            for(String file: configsDir.list())  {
-                //TODO
-            }
+        try {
+            preloadConfigs();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     private void init() {
         this.apiController = new ApiController();
         this.jsonParser = new JsonParser();
+        setButtonListeners();
+        setTextFieldListeners();
+    }
 
+    private void preloadConfigs() throws IOException {
+        Optional<String[]> result = ConfigFileUtils.getFirstConfigFileData();
+        if(result.isPresent()) {
+            String[] configData = result.get();
+            apiController.updateApi(configData[0]);
+            apiKeyField.setText(configData[1]);
+        }
+    }
+
+    private void setButtonListeners() {
         filePathButton.addActionListener(e -> {
 
         });
@@ -50,10 +65,27 @@ public class MainLayout extends Layout {
         });
     }
 
+    private void setTextFieldListeners() {
+        symbolField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { updated(e); }
+            public void removeUpdate(DocumentEvent e) { updated(e); }
+            public void changedUpdate(DocumentEvent e) { updated(e); }
+            public void updated(DocumentEvent e) {
+                apiController.updateSymbol(symbolField.getText());
+            }
+        });
+        apiKeyField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { updated(e); }
+            public void removeUpdate(DocumentEvent e) { updated(e); }
+            public void changedUpdate(DocumentEvent e) { updated(e); }
+            public void updated(DocumentEvent e) {
+                apiController.updateApiKey(apiKeyField.getText());
+            }
+        });
+    }
+
     private boolean startQuery() {
-        apiController.updateSymbol(symbolField.getText());
-        apiController.updateApiKey(apiKeyField.getText());
-        apiController.updateApi("alpha");
+//        apiController.updateApi("AlphaVantage");
         Optional<String[]> urls = apiController.getRequestUrls();
         if(urls.isPresent()) {
             QueryHandler queryHandler = new QueryHandler(urls.get());
