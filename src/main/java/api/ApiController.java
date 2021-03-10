@@ -1,8 +1,8 @@
-package api;
+package main.java.api;
 
 import java.util.Optional;
 
-import static api.ApiFactory.buildApi;
+import static main.java.api.ApiFactory.buildApi;
 
 public class ApiController {
 

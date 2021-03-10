@@ -1,18 +1,14 @@
-package layout;
+package main.java.layout;
 
-import api.ApiController;
-import file.ConfigFileUtils;
-import http.QueryHandler;
-import parser.JsonParser;
+import main.java.api.ApiController;
+import main.java.file.ConfigFileUtils;
+import main.java.http.QueryHandler;
+import main.java.parser.JsonParser;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;

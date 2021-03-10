@@ -1,4 +1,4 @@
-package http;
+package main.java.http;
 
 import java.io.*;
 import java.net.HttpURLConnection;

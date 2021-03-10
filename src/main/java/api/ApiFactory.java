@@ -1,4 +1,4 @@
-package api;
+package main.java.api;
 
 public abstract class ApiFactory {
 
