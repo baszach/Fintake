@@ -1,4 +1,4 @@
-package main.java.parser;
+package parser;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;

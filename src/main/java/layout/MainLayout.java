@@ -1,9 +1,9 @@
-package main.java.layout;
+package layout;
 
-import main.java.api.ApiController;
-import main.java.file.ConfigFileUtils;
-import main.java.http.QueryHandler;
-import main.java.parser.JsonParser;
+import api.ApiController;
+import file.ConfigFileUtils;
+import http.QueryHandler;
+import parser.JsonParser;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

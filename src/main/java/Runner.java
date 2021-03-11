@@ -1,6 +1,4 @@
-package main.java;
-
-import main.java.layout.MainLayout;
+import layout.MainLayout;
 
 import javax.swing.*;
 
