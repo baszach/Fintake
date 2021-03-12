@@ -6,8 +6,6 @@ import http.QueryHandler;
 import parser.JsonParser;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.IOException;
 import java.util.HashSet;
@@ -32,16 +30,15 @@ public class MainLayout extends Layout {
         this.apiController = new ApiController();
         this.jsonParser = new JsonParser();
         setButtonListeners();
-        setTextFieldListeners();
     }
 
     private void preloadConfigs() throws IOException {
         Optional<String[]> result = ConfigFileUtils.getFirstConfigFileData();
-        if(result.isPresent()) {
+        result.ifPresent(strings -> {
             String[] configData = result.get();
-            apiController.updateApi(configData[0]);
+            apiController.apiName = configData[0];
             apiKeyField.setText(configData[1]);
-        }
+        });
     }
 
     private void setButtonListeners() {
@@ -57,38 +54,28 @@ public class MainLayout extends Layout {
 
         magicButton.addActionListener(e -> {
             Set<String> keys = getSelectedKeys();
+            try {
+                ConfigFileUtils.createAndSaveConfigFile(
+                        apiController.apiName,
+                        apiController.apiKey,
+                        keys);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             //TODO here create CSV table using selected keys
         });
     }
 
-    private void setTextFieldListeners() {
-        symbolField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { updated(e); }
-            public void removeUpdate(DocumentEvent e) { updated(e); }
-            public void changedUpdate(DocumentEvent e) { updated(e); }
-            public void updated(DocumentEvent e) {
-                apiController.updateSymbol(symbolField.getText());
-            }
-        });
-        apiKeyField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { updated(e); }
-            public void removeUpdate(DocumentEvent e) { updated(e); }
-            public void changedUpdate(DocumentEvent e) { updated(e); }
-            public void updated(DocumentEvent e) {
-                apiController.updateApiKey(apiKeyField.getText());
-            }
-        });
-    }
-
     private boolean startQuery() {
-//        apiController.updateApi("AlphaVantage");
+        apiController.symbol = symbolField.getText();
+        apiController.apiKey = apiKeyField.getText();
+        apiController.apiName = "AlphaVantage";
         Optional<String[]> urls = apiController.getRequestUrls();
-        if(urls.isPresent()) {
+        urls.ifPresent(strings -> {
             QueryHandler queryHandler = new QueryHandler(urls.get());
             jsonParser.updateJsons(queryHandler.requestData());
-            return true;
-        }
-        return false;
+        });
+        return urls.isPresent();
     }
 
     private void displayKeysForSelection() {

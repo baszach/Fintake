@@ -6,9 +6,9 @@ import static api.ApiFactory.buildApi;
 
 public class ApiController {
 
-    private String symbol;
-    private String apiKey;
-    private String apiName;
+    public String symbol;
+    public String apiKey;
+    public String apiName;
 
     public ApiController() {
         symbol = "";
@@ -20,18 +20,9 @@ public class ApiController {
         if(symbol.isEmpty() || apiKey.isEmpty() || apiName.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(buildApi(apiName).createRequestUrls(symbol, apiKey));
-    }
-
-    public void updateSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public void updateApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public void updateApi(String apiName) {
-        this.apiName = apiName;
+        SupportedApi api = buildApi(apiName);
+        return api != null ?
+                Optional.of(api.createRequestUrls(symbol, apiKey)) :
+                Optional.empty();
     }
 }

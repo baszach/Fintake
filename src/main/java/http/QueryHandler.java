@@ -5,7 +5,7 @@ public class QueryHandler {
     private String[] urls;
 
     public QueryHandler(String... urls) {
-        updateUrls(urls);
+        this.urls = urls;
     }
 
     public String[] requestData() {
@@ -15,9 +15,5 @@ public class QueryHandler {
             data[i] = httpHandler.makeServiceCall(urls[i]);
         }
         return data;
-    }
-
-    public void updateUrls(String... urls) {
-        this.urls = urls;
     }
 }

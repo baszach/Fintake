@@ -5,11 +5,24 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 
 public class ConfigFileUtils {
 
+    public static final String CONFIGS_PATH = "configs\\";
+
     public ConfigFileUtils() throws Exception {
         throw new Exception("Do not initialize util class!");
+    }
+
+    public static void createAndSaveConfigFile(String apiName, String apiKey, Set<String> keys) throws IOException {
+        StringBuilder builder = new StringBuilder();
+        builder.append(apiName).append(",");
+        builder.append(apiKey).append(",");
+        for (String key: keys) {
+            builder.append(key).append(",");
+        }
+        FileUtils.saveFile(CONFIGS_PATH + apiName, builder.toString());
     }
 
     public static Optional<String[]> getFirstConfigFileData() throws IOException {
