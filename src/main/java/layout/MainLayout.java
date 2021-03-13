@@ -1,13 +1,17 @@
 package layout;
 
 import api.ApiController;
+import file.ConfigData;
 import file.ConfigFileUtils;
+import file.CsvData;
+import file.CsvFileUtils;
 import http.QueryHandler;
 import parser.JsonParser;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -33,11 +37,11 @@ public class MainLayout extends Layout {
     }
 
     private void preloadConfigs() throws IOException {
-        Optional<String[]> result = ConfigFileUtils.getFirstConfigFileData();
+        Optional<ConfigData> result = ConfigFileUtils.getFirstConfigFile();
         result.ifPresent(strings -> {
-            String[] configData = result.get();
-            apiController.apiName = configData[0];
-            apiKeyField.setText(configData[1]);
+            ConfigData configData = result.get();
+            apiController.apiName = configData.apiName;
+            apiKeyField.setText(configData.apiKey);
         });
     }
 
@@ -48,21 +52,41 @@ public class MainLayout extends Layout {
 
         queryButton.addActionListener(e -> {
             if(startQuery()) {
-                displayKeysForSelection();
+                try {
+                    displayKeysForSelection();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
         magicButton.addActionListener(e -> {
-            Set<String> keys = getSelectedKeys();
+            Set<String> selectedKeys = getSelectedKeys();
             try {
                 ConfigFileUtils.createAndSaveConfigFile(
-                        apiController.apiName,
-                        apiController.apiKey,
-                        keys);
-            } catch (IOException ex) {
+                        new ConfigData(
+                            apiController.apiName,
+                            apiController.apiKey,
+                            selectedKeys
+                        )
+                );
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            //TODO here create CSV table using selected keys
+            String csvPath = filePathField.getText();
+            HashMap<String, Object> map = new HashMap<>();
+            jsonParser.jsonsToMap().forEach((s, o) -> {
+                if (selectedKeys.contains(s)) {
+                    map.put(s, o);
+                }
+            });
+
+            CsvData csvData = new CsvData(map);
+            try {
+                CsvFileUtils.createAndSaveCsvFile(csvData, csvPath);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
     }
 
@@ -78,15 +102,22 @@ public class MainLayout extends Layout {
         return urls.isPresent();
     }
 
-    private void displayKeysForSelection() {
+    private void displayKeysForSelection() throws IOException {
         Set<String> keySet = jsonParser.jsonsToMap().keySet();
-        if(!keySet.isEmpty()) {
+        Optional<ConfigData> result = ConfigFileUtils.getConfigFile(apiController.apiName);
+        Set<String> preferenceKeySet = result.isPresent() ?
+                result.get().getKeys() :
+                new HashSet<>();
+
+        if (!keySet.isEmpty()) {
             int index = 0;
-            for(String key: keySet) {
+            for (String key : keySet) {
                 java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
                 gridBagConstraints.gridx = 0;
                 gridBagConstraints.gridy = index++;
-                keysPanel.add(new JCheckBox(key), gridBagConstraints);
+                JCheckBox checkBox = new JCheckBox(key);
+                checkBox.setSelected(preferenceKeySet.contains(key));
+                keysPanel.add(checkBox, gridBagConstraints);
             }
             keysPanel.repaint();
             this.repaint();

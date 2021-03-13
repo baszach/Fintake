@@ -2,7 +2,7 @@ package http;
 
 public class QueryHandler {
 
-    private String[] urls;
+    private final String[] urls;
 
     public QueryHandler(String... urls) {
         this.urls = urls;
