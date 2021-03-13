@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainLayout extends Layout {
 
@@ -23,26 +24,28 @@ public class MainLayout extends Layout {
 
     public MainLayout() {
         init();
-        try {
-            preloadConfigs();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        preloadConfigs();
     }
 
     private void init() {
         this.apiController = new ApiController();
         this.jsonParser = new JsonParser();
+        magicButton.setEnabled(false);
         setButtonListeners();
     }
 
-    private void preloadConfigs() throws IOException {
-        Optional<ConfigData> result = ConfigFileUtils.getFirstConfigFile();
-        result.ifPresent(strings -> {
-            ConfigData configData = result.get();
-            apiController.apiName = configData.apiName;
-            apiKeyField.setText(configData.apiKey);
-        });
+    private void preloadConfigs() {
+        try {
+            Optional<ConfigData> result = ConfigFileUtils.getFirstConfigFile();
+            result.ifPresent(strings -> {
+                ConfigData configData = result.get();
+                apiController.apiName = configData.apiName;
+                apiKeyField.setText(configData.apiKey);
+            });
+        } catch (IOException e) {
+            //TODO pop-up -> something went wrong
+            e.printStackTrace();
+        }
     }
 
     private void setButtonListeners() {
@@ -54,52 +57,67 @@ public class MainLayout extends Layout {
             if(startQuery()) {
                 try {
                     displayKeysForSelection();
+                    magicButton.setEnabled(true);
                 } catch (IOException ex) {
+                    //TODO pop-up -> something went wrong
                     ex.printStackTrace();
                 }
+            } else {
+                //TODO pop-up -> query failed
             }
         });
 
         magicButton.addActionListener(e -> {
+            magicButton.setEnabled(false);
             Set<String> selectedKeys = getSelectedKeys();
-            try {
+            try { //TODO create method -> pop-up asks user, if old config shall be overwritten
                 ConfigFileUtils.createAndSaveConfigFile(
-                        new ConfigData(
-                            apiController.apiName,
+                        new ConfigData(apiController.apiName,
                             apiController.apiKey,
-                            selectedKeys
-                        )
+                            selectedKeys)
                 );
             } catch (Exception ex) {
+                //TODO pop-up -> something went wrong
                 ex.printStackTrace();
             }
-            String csvPath = filePathField.getText();
-            HashMap<String, Object> map = new HashMap<>();
-            jsonParser.jsonsToMap().forEach((s, o) -> {
-                if (selectedKeys.contains(s)) {
-                    map.put(s, o);
-                }
-            });
 
-            CsvData csvData = new CsvData(map);
-            try {
-                CsvFileUtils.createAndSaveCsvFile(csvData, csvPath);
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            String csvPath = filePathField.getText();
+            if(! csvPath.isEmpty()) {
+                //TODO create method -> pop-up asks for user verification for saving csv file
+                HashMap<String, Object> map = new HashMap<>();
+                jsonParser.jsonsToMap().forEach((s, o) -> {
+                    if (selectedKeys.contains(s)) {
+                        map.put(s, o);
+                    }
+                });
+
+                CsvData csvData = new CsvData(map);
+                try {
+                    CsvFileUtils.createAndSaveCsvFile(csvData, csvPath);
+                } catch (Exception ex) {
+                    //TODO pop-up -> something went wrong
+                    ex.printStackTrace();
+                }
             }
         });
     }
 
     private boolean startQuery() {
-        apiController.symbol = symbolField.getText();
-        apiController.apiKey = apiKeyField.getText();
-        apiController.apiName = "AlphaVantage";
+        updateApiControllerFields();
         Optional<String[]> urls = apiController.getRequestUrls();
+        AtomicBoolean querySuccessful = new AtomicBoolean(false);
         urls.ifPresent(strings -> {
             QueryHandler queryHandler = new QueryHandler(urls.get());
             jsonParser.updateJsons(queryHandler.requestData());
+            querySuccessful.set(true);
         });
-        return urls.isPresent();
+        return querySuccessful.get();
+    }
+
+    private void updateApiControllerFields() {
+        apiController.symbol = symbolField.getText();
+        apiController.apiKey = apiKeyField.getText();
+        apiController.apiName = "AlphaVantage";
     }
 
     private void displayKeysForSelection() throws IOException {
@@ -111,16 +129,16 @@ public class MainLayout extends Layout {
 
         if (!keySet.isEmpty()) {
             int index = 0;
+            GridBagConstraints gridBagConstraints = new GridBagConstraints();
+            gridBagConstraints.gridx = index;
             for (String key : keySet) {
-                java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.gridx = 0;
                 gridBagConstraints.gridy = index++;
                 JCheckBox checkBox = new JCheckBox(key);
                 checkBox.setSelected(preferenceKeySet.contains(key));
                 keysPanel.add(checkBox, gridBagConstraints);
             }
+            keysPanel.revalidate();
             keysPanel.repaint();
-            this.repaint();
         }
     }
 
