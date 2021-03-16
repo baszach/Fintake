@@ -42,9 +42,9 @@ public class MainLayout extends Layout {
                 apiController.apiName = configData.apiName;
                 apiKeyField.setText(configData.apiKey);
             });
-        } catch (IOException e) {
-            //TODO pop-up -> something went wrong
-            e.printStackTrace();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Something went wrong while preloading your configurations!");
+            ex.printStackTrace();
         }
     }
 
@@ -59,11 +59,11 @@ public class MainLayout extends Layout {
                     displayKeysForSelection();
                     magicButton.setEnabled(true);
                 } catch (IOException ex) {
-                    //TODO pop-up -> something went wrong
+                    JOptionPane.showMessageDialog(this, "The querying process failed!");
                     ex.printStackTrace();
                 }
             } else {
-                //TODO pop-up -> query failed
+                JOptionPane.showMessageDialog(this, "The querying process failed!");
             }
         });
 
@@ -76,8 +76,9 @@ public class MainLayout extends Layout {
                             apiController.apiKey,
                             selectedKeys)
                 );
+                JOptionPane.showMessageDialog(this, "Saving configuration successful!");
             } catch (Exception ex) {
-                //TODO pop-up -> something went wrong
+                JOptionPane.showMessageDialog(this, "Could not save configuration!");
                 ex.printStackTrace();
             }
 
@@ -94,8 +95,9 @@ public class MainLayout extends Layout {
                 CsvData csvData = new CsvData(map);
                 try {
                     CsvFileUtils.createAndSaveCsvFile(csvData, csvPath);
+                    JOptionPane.showMessageDialog(this, "Saving CSV successful!");
                 } catch (Exception ex) {
-                    //TODO pop-up -> something went wrong
+                    JOptionPane.showMessageDialog(this, "Could not save CSV file!");
                     ex.printStackTrace();
                 }
             }
