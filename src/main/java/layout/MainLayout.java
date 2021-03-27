@@ -1,20 +1,19 @@
 package layout;
 
 import api.ApiController;
+import api.TitledSourceUrl;
 import file.ConfigData;
 import file.ConfigFileUtils;
 import file.CsvData;
 import file.CsvFileUtils;
 import http.QueryHandler;
 import parser.JsonParser;
+import parser.JsonTree;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainLayout extends Layout {
@@ -106,10 +105,15 @@ public class MainLayout extends Layout {
 
     private boolean startQuery() {
         updateApiControllerFields();
-        Optional<String[]> urls = apiController.getRequestUrls();
+        Optional<TitledSourceUrl[]> result = apiController.getRequestUrls();
         AtomicBoolean querySuccessful = new AtomicBoolean(false);
-        urls.ifPresent(strings -> {
-            QueryHandler queryHandler = new QueryHandler(urls.get());
+        result.ifPresent(strings -> {
+            TitledSourceUrl[] titledSourceUrls = result.get();
+            String[] urls = new String[titledSourceUrls.length];
+            for (int i = 0; i < urls.length; i++) {
+                urls[i] = titledSourceUrls[i].getUrl();
+            }
+            QueryHandler queryHandler = new QueryHandler(urls); // FIXME !!!
             jsonParser.updateJsons(queryHandler.requestData());
             querySuccessful.set(true);
         });
@@ -123,6 +127,10 @@ public class MainLayout extends Layout {
     }
 
     private void displayKeysForSelection() throws IOException {
+        JsonTree jsonTree = new JsonTree(jsonParser.firstObj(), "PARENT");
+        jsonTree.buildTree();
+        System.out.println(jsonTree.getTree().toString());
+
         Set<String> keySet = jsonParser.jsonsToMap().keySet();
         Optional<ConfigData> result = ConfigFileUtils.getConfigFile(apiController.apiName);
         Set<String> preferenceKeySet = result.isPresent() ?

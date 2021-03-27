@@ -16,7 +16,7 @@ public class ApiController {
         apiName = "";
     }
 
-    public Optional<String[]> getRequestUrls() {
+    public Optional<TitledSourceUrl[]> getRequestUrls() {
         if(symbol.isEmpty() || apiKey.isEmpty() || apiName.isEmpty()) {
             return Optional.empty();
         }

@@ -1,9 +1,7 @@
 package parser;
 
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,12 +20,19 @@ public class JsonParser {
     public Map<String, Object> jsonsToMap() {
         HashMap<String, Object> map = new HashMap<>();
         for(String json: jsons) {
-            StringReader reader = new StringReader(json);
-            JSONTokener jsonTokener = new JSONTokener(reader);
-            JSONObject jsonObject = new JSONObject(jsonTokener);
+            JSONObject jsonObject = new JSONObject(json);
+            System.out.println(jsonObject);
             map.putAll(jsonObject.toMap());
         }
+        System.out.println(map);
         return map;
+    }
+
+    public JSONObject firstObj() {
+        for (String json: jsons) {
+            return new JSONObject(json);
+        }
+        return null;
     }
 
 
