@@ -18,25 +18,43 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
         return new KeyTree<K>(key, null);
     }
 
+    public KeyTree<K> getParent() {
+        return parent;
+    }
+
     public K getKey() {
         return key;
     }
 
     public boolean addChildByKey(K key) {
-        return children.add(new KeyTree<>(key, this));
+        return !hasChildWithKey(key) && children.add(new KeyTree<>(key, this));
     }
 
     public boolean removeChildByKey(K key) {
-        return children.remove(new KeyTree<>(key, this));
-    }
-
-    public KeyTree<K> getChildByKey(K key) {
         for (KeyTree<K> child: children) {
             if (child.key.equals(key)) {
-                return child;
+                return children.remove(child);
             }
         }
-        return null;
+        return false;
+    }
+
+    public boolean hasChildWithKey(K key) {
+        for (KeyTree<K> child: children) {
+            if (child.key.equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Optional<KeyTree<K>> getChildByKey(K key) {
+        for (KeyTree<K> child: children) {
+            if (child.key.equals(key)) {
+                return Optional.of(child);
+            }
+        }
+        return Optional.empty();
     }
 
     public boolean isLeaf() {
@@ -66,18 +84,34 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
     }
 
     @Override
-    public String toString() {
+    public String toString() { // FIXME
         StringBuilder builder = new StringBuilder();
+        final int[] level = {level()};
         forEach(tree -> {
             String s;
-            if (tree.parent != null) {
-                s = "[" + tree.parent.key + "->" + tree.key + "]";
-            } else {
-                s = "[NULL->" + tree.key + "]";
-            }
-            builder.append(s);
+//            if (tree.level() > level[0]) {
+//                builder.append("\n");
+//                level[0] += 1;
+//            }
+//            if (tree.parent != null) {
+//                s = "[" + tree.parent.key + "->" + tree.key + "]";
+//            } else {
+//                s = "[" + tree.key + "]";
+//            }
+            s = tree.key.toString();
+            builder.append(s).append(", ");
         });
         return builder.toString();
+    }
+
+    public int level() { //FIXME
+        int level = 0;
+        KeyTree<K> currentTree = this;
+        while (currentTree.parent != null) {
+            currentTree = this.parent;
+            level += 1;
+        }
+        return level;
     }
 
     @Override
@@ -87,10 +121,6 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
 
     public BreadthFirstKeyTreeIterator breadthFirstIterator() {
         return new BreadthFirstKeyTreeIterator();
-    }
-
-    public DepthFirstKeyTreeIterator depthFirstIterator() {
-        return new DepthFirstKeyTreeIterator();
     }
 
     private class BreadthFirstKeyTreeIterator implements Iterator<KeyTree<K>> {
@@ -112,6 +142,10 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
             queue.addAll(current.children);
             return current;
         }
+    }
+
+    public DepthFirstKeyTreeIterator depthFirstIterator() {
+        return new DepthFirstKeyTreeIterator();
     }
 
     private class DepthFirstKeyTreeIterator implements Iterator<KeyTree<K>> {

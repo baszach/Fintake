@@ -12,6 +12,7 @@ import parser.JsonTree;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,55 +53,59 @@ public class MainLayout extends Layout {
 
         });
 
-        queryButton.addActionListener(e -> {
-            if(startQuery()) {
-                try {
-                    displayKeysForSelection();
-                    magicButton.setEnabled(true);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "The querying process failed!");
-                    ex.printStackTrace();
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "The querying process failed!");
-            }
-        });
+        queryButton.addActionListener(this::doQuery);
 
-        magicButton.addActionListener(e -> {
-            magicButton.setEnabled(false);
-            Set<String> selectedKeys = getSelectedKeys();
-            try { //TODO create method -> pop-up asks user, if old config shall be overwritten
-                ConfigFileUtils.createAndSaveConfigFile(
-                        new ConfigData(apiController.apiName,
-                            apiController.apiKey,
-                            selectedKeys)
-                );
-                JOptionPane.showMessageDialog(this, "Saving configuration successful!");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Could not save configuration!");
+        magicButton.addActionListener(this::doMagic);
+    }
+
+    private void doQuery(ActionEvent event) {
+        if(startQuery()) {
+            try {
+                displayKeysForSelection();
+                magicButton.setEnabled(true);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "The querying process failed!");
                 ex.printStackTrace();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "The querying process failed!");
+        }
+    }
 
-            String csvPath = filePathField.getText();
-            if(! csvPath.isEmpty()) {
-                //TODO create method -> pop-up asks for user verification for saving csv file
-                HashMap<String, Object> map = new HashMap<>();
-                jsonParser.jsonsToMap().forEach((s, o) -> {
-                    if (selectedKeys.contains(s)) {
-                        map.put(s, o);
-                    }
-                });
+    private void doMagic(ActionEvent event) {
+        magicButton.setEnabled(false);
+        Set<String> selectedKeys = getSelectedKeys();
+        try { //TODO create method -> pop-up asks user, if old config shall be overwritten
+            ConfigFileUtils.createAndSaveConfigFile(
+                    new ConfigData(apiController.apiName,
+                            apiController.apiKey,
+                            selectedKeys)
+            );
+            JOptionPane.showMessageDialog(this, "Saving configuration successful!");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Could not save configuration!");
+            ex.printStackTrace();
+        }
 
-                CsvData csvData = new CsvData(map);
-                try {
-                    CsvFileUtils.createAndSaveCsvFile(csvData, csvPath);
-                    JOptionPane.showMessageDialog(this, "Saving CSV successful!");
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Could not save CSV file!");
-                    ex.printStackTrace();
+        String csvPath = filePathField.getText();
+        if(! csvPath.isEmpty()) {
+            //TODO create method -> pop-up asks for user verification for saving csv file
+            HashMap<String, Object> map = new HashMap<>();
+            jsonParser.jsonsToMap().forEach((s, o) -> {
+                if (selectedKeys.contains(s)) {
+                    map.put(s, o);
                 }
+            });
+
+            CsvData csvData = new CsvData(map);
+            try {
+                CsvFileUtils.createAndSaveCsvFile(csvData, csvPath);
+                JOptionPane.showMessageDialog(this, "Saving CSV successful!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Could not save CSV file!");
+                ex.printStackTrace();
             }
-        });
+        }
     }
 
     private boolean startQuery() {
@@ -127,9 +132,11 @@ public class MainLayout extends Layout {
     }
 
     private void displayKeysForSelection() throws IOException {
+        //TODO delete following 4 lines later
         JsonTree jsonTree = new JsonTree(jsonParser.firstObj(), "PARENT");
         jsonTree.buildTree();
         System.out.println(jsonTree.getTree().toString());
+        System.out.println("\n\n");
 
         Set<String> keySet = jsonParser.jsonsToMap().keySet();
         Optional<ConfigData> result = ConfigFileUtils.getConfigFile(apiController.apiName);

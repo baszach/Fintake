@@ -2,8 +2,6 @@ package api;
 
 import java.util.Optional;
 
-import static api.ApiFactory.buildApi;
-
 public class ApiController {
 
     public String symbol;
@@ -20,9 +18,18 @@ public class ApiController {
         if(symbol.isEmpty() || apiKey.isEmpty() || apiName.isEmpty()) {
             return Optional.empty();
         }
-        SupportedApi api = buildApi(apiName);
+        SupportedApi api = buildApi();
         return api != null ?
                 Optional.of(api.createRequestUrls(symbol, apiKey)) :
                 Optional.empty();
+    }
+
+    private SupportedApi buildApi() {
+        for (SupportedApi api: SupportedApi.values()) {
+            if (api.isApi(apiName)) {
+                return SupportedApi.valueOf(apiName);
+            }
+        }
+        return null;
     }
 }

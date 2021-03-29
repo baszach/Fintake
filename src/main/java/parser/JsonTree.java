@@ -1,8 +1,8 @@
 package parser;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.Map;
 
 public class JsonTree {
@@ -26,28 +26,26 @@ public class JsonTree {
     private void parseMapToTree(KeyTree<String> tree, Map<String, Object> map) {
         map.forEach((key, value) -> {
             if (value instanceof String) {
-                map.remove(key);
                 tree.addChildByKey(key);
-            } else if (value instanceof JSONArray) {
-                parseJsonArray(tree, map, (JSONArray) value, key);
-            } else if (value instanceof JSONObject) {
+            } else if (value instanceof List) { //TODO Why is representation of JSONArray a List?
+                parseJsonArray(tree, (List<?>) value, key);
+            } else if (value instanceof Map) { // TODO Why is representation of JSONObject a Map?
                 if (tree.addChildByKey(key)) {
-                    parseMapToTree(tree.getChildByKey(key), ((JSONObject) value).toMap());
+                    parseMapToTree(tree.getChildByKey(key).get(), map);
                 }
             }
         });
     }
 
-    private void parseJsonArray(KeyTree<String> tree, Map<String, Object> map, JSONArray jsonArray, String key) {
-        jsonArray.forEach(value -> {
+    private void parseJsonArray(KeyTree<String> tree, List<?> list, String key) {
+        list.forEach(value -> {
             if (value instanceof String) {
-                map.remove(key);
                 tree.addChildByKey(key);
-            } else if (value instanceof JSONArray) {
-                parseJsonArray(tree, map, (JSONArray) value, key);
-            } else if (value instanceof JSONObject) {
+            } else if (value instanceof List) {
+                parseJsonArray(tree, (List<?>) value, key);
+            } else if (value instanceof Map) {
                 if (tree.addChildByKey(key)) {
-                    parseMapToTree(tree.getChildByKey(key), ((JSONObject) value).toMap());
+                    parseMapToTree(tree.getChildByKey(key).get(), (Map<String, Object>) value);
                 }
             }
         });
