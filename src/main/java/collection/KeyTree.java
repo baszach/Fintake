@@ -1,8 +1,9 @@
-package parser;
+package collection;
 
 import java.util.*;
+import java.util.function.Predicate;
 
-public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
+public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> { //TODO implement Collection?
 
     private final K key;
     private final KeyTree<K> parent;
@@ -31,34 +32,63 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
     }
 
     public boolean removeChildByKey(K key) {
-        for (KeyTree<K> child: children) {
-            if (child.key.equals(key)) {
-                return children.remove(child);
-            }
-        }
-        return false;
+        return removeChildrenIf(child ->
+            child.key.equals(key)
+        );
     }
 
     public boolean hasChildWithKey(K key) {
-        for (KeyTree<K> child: children) {
-            if (child.key.equals(key)) {
+        return hasChildWith(child ->
+            child.key.equals(key)
+        );
+    }
+
+    public Optional<KeyTree<K>> getChildWithKey(K key) {
+        return getChildWith(child ->
+            child.key.equals(key)
+        );
+    }
+
+    public boolean isLeaf() {
+        return children.isEmpty();
+    }
+
+    public boolean removeChildrenIf(Predicate<KeyTree<K>> predicate) {
+        boolean removed = false;
+        Iterator<KeyTree<K>> it = children.iterator();
+        while (it.hasNext()) {
+            if (predicate.test(it.next())) {
+                it.remove();
+                removed = true;
+            }
+        }
+        return removed;
+    }
+
+    public boolean hasChildWith(Predicate<KeyTree<K>> predicate) {
+        for (KeyTree<K> child : children) {
+            if (predicate.test(child)) {
                 return true;
             }
         }
         return false;
     }
 
-    public Optional<KeyTree<K>> getChildByKey(K key) {
+    public Optional<KeyTree<K>> getChildWith(Predicate<KeyTree<K>> predicate) {
         for (KeyTree<K> child: children) {
-            if (child.key.equals(key)) {
+            if (predicate.test(child)) {
                 return Optional.of(child);
             }
         }
         return Optional.empty();
     }
 
-    public boolean isLeaf() {
-        return children.isEmpty();
+    public Set<K> keySet() {
+        Set<K> keys = new HashSet<>();
+        forEach(tree -> {
+            keys.add(tree.key);
+        });
+        return keys;
     }
 
     //TODO outsource to other class
@@ -84,34 +114,12 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
     }
 
     @Override
-    public String toString() { // FIXME
-        StringBuilder builder = new StringBuilder();
-        final int[] level = {level()};
-        forEach(tree -> {
-            String s;
-//            if (tree.level() > level[0]) {
-//                builder.append("\n");
-//                level[0] += 1;
-//            }
-//            if (tree.parent != null) {
-//                s = "[" + tree.parent.key + "->" + tree.key + "]";
-//            } else {
-//                s = "[" + tree.key + "]";
-//            }
-            s = tree.key.toString();
-            builder.append(s).append(", ");
-        });
-        return builder.toString();
-    }
-
-    public int level() { //FIXME
-        int level = 0;
-        KeyTree<K> currentTree = this;
-        while (currentTree.parent != null) {
-            currentTree = this.parent;
-            level += 1;
+    public String toString() {
+        if (parent != null) {
+            return "[" + parent.key + "->" + this.key + "]";
+        } else {
+            return "[" + this.key + "]";
         }
-        return level;
     }
 
     @Override
@@ -140,31 +148,6 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> {
         public KeyTree<K> next() {
             KeyTree<K> current = queue.remove();
             queue.addAll(current.children);
-            return current;
-        }
-    }
-
-    public DepthFirstKeyTreeIterator depthFirstIterator() {
-        return new DepthFirstKeyTreeIterator();
-    }
-
-    private class DepthFirstKeyTreeIterator implements Iterator<KeyTree<K>> {
-        private final Stack<KeyTree<K>> stack;
-
-        private DepthFirstKeyTreeIterator() {
-            stack = new Stack<>();
-            stack.push(KeyTree.this);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return ! stack.isEmpty();
-        }
-
-        @Override
-        public KeyTree<K> next() {
-            KeyTree<K> current = stack.pop();
-            stack.addAll(current.children);
             return current;
         }
     }

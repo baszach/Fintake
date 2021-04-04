@@ -1,18 +1,18 @@
-import layout.MainLayout;
+import layout.ProgramFrame;
 
-import javax.swing.*;
 
 public class Runner {
 
+    //TODO:
+    // - Improve ConfigFileUtils (+ ConfigData)
+    // - Improve CompanyInfoLayout
+    // - Improve CsvFileUtils (+CsvData)
+    // - Improve PreviewCsvLayout
     public static void main(String[] args) {
         init();
     }
 
     public static void init() {
-        MainLayout mainLayout = new MainLayout();
-        JFrame frame = new JFrame();
-        frame.setSize(1000, 700);
-        frame.add(mainLayout);
-        frame.setVisible(true);
+        new ProgramFrame();
     }
 }

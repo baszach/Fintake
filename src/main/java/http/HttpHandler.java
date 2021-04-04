@@ -6,12 +6,12 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-public class HttpHandler {
+class HttpHandler {
 
-    public HttpHandler() {
+    HttpHandler() {
     }
 
-    public String makeServiceCall(final String requestUrl) {
+    String makeServiceCall(final String requestUrl) {
         String response = null;
         try {
             URL url = new URL(requestUrl);

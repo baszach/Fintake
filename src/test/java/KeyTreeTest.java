@@ -1,6 +1,6 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
-import parser.KeyTree;
+import collection.KeyTree;
 
 import java.util.Optional;
 
@@ -27,10 +27,10 @@ public class KeyTreeTest {
 
         /* getting children */
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        KeyTree<String> get1 = keyTree.getChildByKey("Duckling 1").get(); // Duckling 1
+        KeyTree<String> get1 = keyTree.getChildWithKey("Duckling 1").get(); // Duckling 1
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        KeyTree<String> get2 = keyTree.getChildByKey("Duckling 2").get(); // Duckling 2
-        Optional<KeyTree<String>> get3 = keyTree.getChildByKey("Non duckling"); // Optional.empty()
+        KeyTree<String> get2 = keyTree.getChildWithKey("Duckling 2").get(); // Duckling 2
+        Optional<KeyTree<String>> get3 = keyTree.getChildWithKey("Non duckling"); // Optional.empty()
 
         /* contains children */
         boolean contains1 = keyTree.hasChildWithKey("Duckling 1"); // true

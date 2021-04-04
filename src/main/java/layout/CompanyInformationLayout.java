@@ -9,12 +9,12 @@ package layout;
  *
  * @author taisiia
  */
-public class Layout extends javax.swing.JPanel {
+public class CompanyInformationLayout extends javax.swing.JPanel {
 
     /**
      * Creates new form Layout
      */
-    public Layout() {
+    public CompanyInformationLayout() {
         initComponents();
     }
 
@@ -30,21 +30,25 @@ public class Layout extends javax.swing.JPanel {
 
         jSplitPane1 = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
-        theTitle = new javax.swing.JLabel();
+        titleLabel = new javax.swing.JLabel();
         symbolLabel = new javax.swing.JLabel();
         symbolField = new javax.swing.JTextField();
-        filePathLabel = new javax.swing.JLabel();
-        filePathField = new javax.swing.JTextField();
-        filePathButton = new javax.swing.JButton();
+        configLabel = new javax.swing.JLabel();
+        configComboBox = new javax.swing.JComboBox<>();
+        apiLabel = new javax.swing.JLabel();
+        apiComboBox = new javax.swing.JComboBox<>();
         apiKeyLabel = new javax.swing.JLabel();
         apiKeyField = new javax.swing.JTextField();
-        queryButton = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
+        jPanel8 = new javax.swing.JPanel();
+        queryButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
         keysPanel = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
-        magicButton = new javax.swing.JButton();
+        nextButton = new javax.swing.JButton();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -52,11 +56,11 @@ public class Layout extends javax.swing.JPanel {
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        theTitle.setText("BREAK THE CODE AND BECOME A MILLIONER");
+        titleLabel.setText("Company Information Tool");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.insets = new java.awt.Insets(12, 12, 0, 12);
-        jPanel1.add(theTitle, gridBagConstraints);
+        jPanel1.add(titleLabel, gridBagConstraints);
 
         symbolLabel.setText("Company symbol:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -80,41 +84,33 @@ public class Layout extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 6);
         jPanel1.add(symbolField, gridBagConstraints);
 
-        filePathLabel.setText("File path:");
+        configLabel.setText("Configuration:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
-        jPanel1.add(filePathLabel, gridBagConstraints);
+        jPanel1.add(configLabel, gridBagConstraints);
+
+        configComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "<None>" }));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
-        jPanel1.add(filePathField, gridBagConstraints);
-
-        filePathButton.setText("open");
-        filePathButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                filePathButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 2;
         gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 6);
-        jPanel1.add(filePathButton, gridBagConstraints);
+        jPanel1.add(configComboBox, gridBagConstraints);
 
-        apiKeyLabel.setText("API Key:");
+        apiLabel.setText("API:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
-        jPanel1.add(apiKeyLabel, gridBagConstraints);
+        jPanel1.add(apiLabel, gridBagConstraints);
+
+        apiComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "<None>" }));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -122,15 +118,23 @@ public class Layout extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 6);
-        jPanel1.add(apiKeyField, gridBagConstraints);
+        jPanel1.add(apiComboBox, gridBagConstraints);
 
-        queryButton.setText("query");
+        apiKeyLabel.setText("API Key:");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
+        jPanel1.add(apiKeyLabel, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 6);
-        jPanel1.add(queryButton, gridBagConstraints);
+        jPanel1.add(apiKeyField, gridBagConstraints);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -145,24 +149,60 @@ public class Layout extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         jPanel1.add(jPanel3, gridBagConstraints);
 
+        jPanel7.setLayout(new java.awt.GridBagLayout());
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        jPanel7.add(jPanel8, gridBagConstraints);
+
+        queryButton.setMnemonic('Q');
+        queryButton.setText("Query");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(6, 12, 6, 6);
+        jPanel7.add(queryButton, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        jPanel1.add(jPanel7, gridBagConstraints);
+
         jSplitPane1.setLeftComponent(jPanel1);
 
         jPanel2.setLayout(new java.awt.GridBagLayout());
 
         keysPanel.setLayout(new java.awt.GridBagLayout());
+        jScrollPane1.setViewportView(keysPanel);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
-        jPanel2.add(keysPanel, gridBagConstraints);
+        jPanel2.add(jScrollPane1, gridBagConstraints);
 
         jPanel5.setLayout(new java.awt.GridBagLayout());
 
@@ -182,13 +222,14 @@ public class Layout extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         jPanel5.add(jPanel6, gridBagConstraints);
 
-        magicButton.setText("let magic happen...");
+        nextButton.setMnemonic('N');
+        nextButton.setText("Next");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(6, 12, 6, 6);
-        jPanel5.add(magicButton, gridBagConstraints);
+        jPanel5.add(nextButton, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -206,32 +247,32 @@ public class Layout extends javax.swing.JPanel {
         add(jSplitPane1, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void filePathButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filePathButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_filePathButtonActionPerformed
-
     private void symbolFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_symbolFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_symbolFieldActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    javax.swing.JComboBox<String> apiComboBox;
     javax.swing.JTextField apiKeyField;
     javax.swing.JLabel apiKeyLabel;
-    javax.swing.JButton filePathButton;
-    javax.swing.JTextField filePathField;
-    javax.swing.JLabel filePathLabel;
+    javax.swing.JLabel apiLabel;
+    javax.swing.JComboBox<String> configComboBox;
+    javax.swing.JLabel configLabel;
     javax.swing.JPanel jPanel1;
     javax.swing.JPanel jPanel2;
     javax.swing.JPanel jPanel3;
     javax.swing.JPanel jPanel5;
     javax.swing.JPanel jPanel6;
+    javax.swing.JPanel jPanel7;
+    javax.swing.JPanel jPanel8;
+    javax.swing.JScrollPane jScrollPane1;
     javax.swing.JSplitPane jSplitPane1;
     javax.swing.JPanel keysPanel;
-    javax.swing.JButton magicButton;
+    javax.swing.JButton nextButton;
     javax.swing.JButton queryButton;
     javax.swing.JTextField symbolField;
     javax.swing.JLabel symbolLabel;
-    javax.swing.JLabel theTitle;
+    javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
 }
