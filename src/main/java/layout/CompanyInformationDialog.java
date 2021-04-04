@@ -20,15 +20,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static file.ConfigFileUtils.getConfigFileByName;
 import static file.ConfigFileUtils.getConfigFilesByApi;
 
-public class CompanyInfoLayout extends CompanyInformationLayout {
+public class CompanyInformationDialog extends CompanyInformationLayout {
 
+
+    private CompanyInformationLayout layout; //TODO !!!!!
     private static final int CACHE_CAPACITY = 3;
     private CacheMap<String, Set<ConfigData>> configCache;
     private final NavigatorAction navigatorAction;
     private ApiController apiController;
     private JsonTree jsonTree;
 
-    public CompanyInfoLayout(NavigatorAction navigatorAction) {
+    public CompanyInformationDialog(NavigatorAction navigatorAction) {
         this.navigatorAction = navigatorAction;
         init();
         loadApis();

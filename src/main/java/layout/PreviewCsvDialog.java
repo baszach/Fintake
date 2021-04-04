@@ -1,10 +1,10 @@
 package layout;
 
-public class PreviewCsvLayout extends OutputLayout {
+public class PreviewCsvDialog {
 
     private final NavigatorAction navigatorAction;
 
-    public PreviewCsvLayout(NavigatorAction navigatorAction) {
+    public PreviewCsvDialog(NavigatorAction navigatorAction) {
         this.navigatorAction = navigatorAction;
     }
 }

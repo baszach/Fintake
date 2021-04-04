@@ -9,7 +9,7 @@ public class ProgramFrame extends JFrame {
     }
 
     private void init() {
-        CompanyInfoLayout companyInfoLayout = new CompanyInfoLayout(NAVIGATOR_ACTION);
+        CompanyInformationDialog companyInfoLayout = new CompanyInformationDialog(NAVIGATOR_ACTION);
         setSize(1000, 700);
         add(companyInfoLayout);
         setVisible(true);
