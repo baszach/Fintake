@@ -24,7 +24,6 @@ public class CompanyInfoLayout extends CompanyInformationLayout {
 
     private static final int CACHE_CAPACITY = 3;
     private CacheMap<String, Set<ConfigData>> configCache;
-
     private final NavigatorAction navigatorAction;
     private ApiController apiController;
     private JsonTree jsonTree;
@@ -171,38 +170,4 @@ public class CompanyInfoLayout extends CompanyInformationLayout {
         }
         return keys;
     }
-
-
-//        try { //TODO create method -> pop-up asks user, if old config shall be overwritten
-//        createAndSaveConfigFile(
-//                new ConfigData("FILE",
-//                        apiController.apiName,
-//                        apiController.apiKey,
-//                        selectedKeys)
-//        );
-//        JOptionPane.showMessageDialog(this, "Saving configuration successful!");
-//    } catch (Exception ex) {
-//        JOptionPane.showMessageDialog(this, "Could not save configuration!");
-//        ex.printStackTrace();
-//    }
-//
-//    String csvPath = apiLabel.getText();
-//        if(! csvPath.isEmpty()) {
-//        //TODO create method -> pop-up asks for user verification for saving csv file
-//        HashMap<String, Object> map = new HashMap<>();
-////            jsonParser.jsonsToMap().forEach((s, o) -> { //TODO fix?!
-////                if (selectedKeys.contains(s)) {
-////                    map.put(s, o);
-////                }
-////            });
-//
-//        CsvData csvData = new CsvData(map);
-//        try {
-//            CsvFileUtils.createAndSaveCsvFile(csvData, csvPath);
-//            JOptionPane.showMessageDialog(this, "Saving CSV successful!");
-//        } catch (Exception ex) {
-//            JOptionPane.showMessageDialog(this, "Could not save CSV file!");
-//            ex.printStackTrace();
-//        }
-//    }
 }

@@ -15,7 +15,13 @@ public enum FinancialApi {
 
     YahooFinance {
         public String[] createRequestUrls(String symbol, String apiKey) {
-            return null;
+            return new String[0];
+        }
+    },
+
+    OtherApi {
+        public String[] createRequestUrls(String symbol, String apiKey) {
+            return new String[0];
         }
     };
 

@@ -13,6 +13,6 @@ public class CacheMap<K, V> extends LinkedHashMap<K, V> {
 
     @Override
     protected boolean removeEldestEntry(Map.Entry<K, V> entry) {
-        return size() >= capacity;
+        return size() > capacity;
     }
 }

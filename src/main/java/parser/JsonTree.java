@@ -3,10 +3,7 @@ package parser;
 import collection.KeyTree;
 import org.json.JSONObject;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class JsonTree {
 
@@ -45,9 +42,13 @@ public class JsonTree {
             map.forEach((key, value) -> {
                 if (value instanceof String) {
                     tree.addChildByKey(key);
-                } else if (value instanceof List) { //TODO Why is representation of JSONArray a List?
+                    Optional<KeyTree<String>> result = tree.getChildWithKey(key);
+                    result.ifPresent(resultTree -> {
+                        resultTree.addChildByKey((String) value); //TODO is it good to add values? probably not...
+                    });
+                } else if (value instanceof List) {
                     parseJsonArray(tree, (List<?>) value, key);
-                } else if (value instanceof Map) { // TODO Why is representation of JSONObject a Map?
+                } else if (value instanceof Map) {
                     if (tree.addChildByKey(key)) {
                         parseMapToTree(tree.getChildWithKey(key).get(), map);
                     }
