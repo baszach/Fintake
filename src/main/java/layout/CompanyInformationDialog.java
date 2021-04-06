@@ -2,7 +2,6 @@ package layout;
 
 import api.ApiController;
 import api.FinancialApi;
-import collection.CacheMap;
 import file.ConfigData;
 import http.QueryHandler;
 import org.json.JSONObject;
@@ -12,63 +11,63 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
-import static file.ConfigFileUtils.getConfigFileByName;
-import static file.ConfigFileUtils.getConfigFilesByApi;
+import static file.ConfigFileUtils.*;
 
 public class CompanyInformationDialog extends CompanyInformationLayout {
 
-
-    private CompanyInformationLayout layout; //TODO !!!!!
-    private static final int CACHE_CAPACITY = 3;
-    private CacheMap<String, Set<ConfigData>> configCache;
+    private final CompanyInformationLayout layout;
     private final NavigatorAction navigatorAction;
-    private ApiController apiController;
+    private final ApiController apiController;
+    private Map<String, List<ConfigData>> configs;
     private JsonTree jsonTree;
 
     public CompanyInformationDialog(NavigatorAction navigatorAction) {
+        this.layout = new CompanyInformationLayout();
         this.navigatorAction = navigatorAction;
+        this.apiController = new ApiController();
         init();
-        loadApis();
-        loadConfigIntoLayout();
+    }
+
+    public CompanyInformationLayout getDialogLayout() {
+        return layout;
     }
 
     private void init() {
-        this.configCache = new CacheMap<>(CACHE_CAPACITY);
-        this.apiController = new ApiController();
         nextButton.setEnabled(false);
         setActionListeners();
+        preloadApis();
+        preloadConfigurations();
+        loadConfigIntoLayout();
     }
 
-    private void loadApis() {
+    private void preloadApis() {
         apiComboBox.removeAllItems();
         for (FinancialApi api: FinancialApi.values()) {
             apiComboBox.addItem(api.name());
         }
     }
 
+    private void preloadConfigurations() {
+        configs = getAllConfigFiles().stream()
+                .collect(Collectors.groupingBy(ConfigData::getApiName));
+    }
+
     private void loadConfigIntoLayout() {
-        String selectedApiName = getSelectedApiName();
         configComboBox.removeAllItems();
         configComboBox.addItem("<None>");
-        Set<ConfigData> configFiles =
-                configCache.containsKey(selectedApiName) ?
-                        configCache.get(selectedApiName) :
-                        getConfigFilesByApi(selectedApiName);
-        configCache.putIfAbsent(selectedApiName, configFiles);
-        for (ConfigData configData: configFiles) {
-            if (configData.getApiName().equals(selectedApiName)) {
-                configComboBox.addItem(configData.getFileName());
-            }
+        for (ConfigData configData: configs.get(getSelectedApiName())) {
+            configComboBox.addItem(configData.getFileName());
         }
     }
 
     private void setActionListeners() {
         queryButton.addActionListener(this::queryAndDisplayKeys);
+        //TODO put listener actions in extra methods
         nextButton.addActionListener(e -> {
             computeSelectedKeys();
             navigatorAction.nextAction();
@@ -102,10 +101,6 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
         }
     }
 
-    private void computeSelectedKeys() {
-        Set<String> selectedKeys = getSelectedKeys();
-    }
-
     private boolean startQuery() {
         updateApiControllerFields();
         Optional<String[]> result = apiController.getRequestUrls();
@@ -125,16 +120,6 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
             }
         });
         return querySuccessful.get();
-    }
-
-    private void updateApiControllerFields() {
-        apiController.setSymbol(symbolField.getText());
-        apiController.setApiKey(apiKeyField.getText());
-        apiController.setApiName(getSelectedApiName());
-    }
-
-    private String getSelectedApiName() {
-        return apiComboBox.getItemAt(apiComboBox.getSelectedIndex());
     }
 
     private void displayKeysForSelection() throws IOException {
@@ -171,5 +156,19 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
             }
         }
         return keys;
+    }
+
+    private void computeSelectedKeys() {
+        Set<String> selectedKeys = getSelectedKeys();
+    }
+
+    private void updateApiControllerFields() {
+        apiController.setSymbol(symbolField.getText());
+        apiController.setApiKey(apiKeyField.getText());
+        apiController.setApiName(getSelectedApiName());
+    }
+
+    private String getSelectedApiName() {
+        return apiComboBox.getItemAt(apiComboBox.getSelectedIndex());
     }
 }
