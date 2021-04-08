@@ -15,10 +15,10 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static file.ConfigFileUtils.*;
+import static parser.JsonKeySelectionTree.*;
 
 public class CompanyInformationDialog extends CompanyInformationLayout {
 
@@ -76,7 +76,7 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
         queryButton.addActionListener(this::queryAndDisplayKeys);
         //TODO put listener actions in extra methods
         nextButton.addActionListener(e -> {
-            computeSelectedKeys();
+            //TODO give selected keys (or whole tree) to next dialog
             navigatorAction.nextAction();
         });
         apiComboBox.addActionListener(e -> {
@@ -110,23 +110,21 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
 
     private boolean startQuery() {
         updateApiControllerFields();
-        Optional<String[]> result = apiController.getRequestUrls();
-        AtomicBoolean querySuccessful = new AtomicBoolean(false);
-        result.ifPresent(strings -> {
-            QueryHandler queryHandler = new QueryHandler(result.get());
-            String[] data = queryHandler.requestData();
-            JsonKeySelectionTree.Builder builder = new JsonKeySelectionTree.Builder("Parent");
-            for (String jsonString: data) {
-                builder.addJsonObject(new JSONObject(jsonString));
-            }
-            try {
-                jsonTree = builder.parseObjectsAndCreateTree();
-                querySuccessful.set(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        return querySuccessful.get();
+        String[] urls = apiController.getRequestUrls();
+        boolean querySuccessful = false;
+        QueryHandler queryHandler = new QueryHandler(urls);
+        String[] data = queryHandler.requestData();
+        Builder builder = new Builder("Data");
+        for (String jsonString: data) {
+            builder.addJsonObject(new JSONObject(jsonString));
+        }
+        try {
+            jsonTree = builder.parseObjectsToTree();
+            querySuccessful = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return querySuccessful;
     }
 
     private void displayKeysForSelection() throws IOException {
@@ -139,45 +137,30 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
             }
         }
         int index = 0;
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = index;
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1;
         while (iterator.hasNext()) {
             KeyTree<KeySelection> keySelectionKeyTree = iterator.next();
             KeySelection keySelection = keySelectionKeyTree.getKey();
-            gridBagConstraints.gridy = index++;
-            JCheckBox checkBox = new JCheckBox(keySelection.getKey());
-            checkBox.setSelected(preferenceKeySet.contains(keySelection.getKey()));
+            JCheckBox checkBox = new JCheckBox(keySelection.key());
+            checkBox.setSelected(preferenceKeySet.contains(keySelection.key()));
             checkBox.addActionListener(e -> {
                 keySelection.setSelected(checkBox.isSelected());
-                System.out.println(keySelection.getKey() + " selected? " + keySelection.isSelected());
             });
-            int indentBy = keySelectionKeyTree.getLevel() + 1;
-            gridBagConstraints.insets = new java.awt.Insets(6, indentBy * 12, 0, 0);
+            int insetBy = keySelectionKeyTree.getLevel() + 1;
+            GridBagConstraints gridBagConstraints = generateConstraints(index++, insetBy);
             keysPanel.add(checkBox, gridBagConstraints);
-            if(index == 20) break;
         }
         keysPanel.revalidate();
         keysPanel.repaint();
     }
 
-    private Set<String> getSelectedKeys() {
-        Set<String> keys = new HashSet<>();
-        for(int i = 0; i < keysPanel.getComponentCount(); i++) {
-            Component c = keysPanel.getComponent(i);
-            if(c instanceof JCheckBox) {
-                JCheckBox b = (JCheckBox) c;
-                if (b.isSelected()) {
-                    keys.add(b.getText());
-                }
-            }
-        }
-        return keys;
-    }
-
-    private void computeSelectedKeys() {
-        Set<String> selectedKeys = getSelectedKeys();
+    private GridBagConstraints generateConstraints(int yIndex, int insetFactor) {
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1;
+        gridBagConstraints.gridy = yIndex;
+        gridBagConstraints.insets = new java.awt.Insets(6, insetFactor * 12, 0, 0);
+        return gridBagConstraints;
     }
 
     private void updateApiControllerFields() {

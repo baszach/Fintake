@@ -1,7 +1,5 @@
 package api;
 
-import java.util.Optional;
-
 public class ApiController {
 
     private String symbol;
@@ -38,14 +36,13 @@ public class ApiController {
         this.apiName = apiName;
     }
 
-    public Optional<String[]> getRequestUrls() {
-        if(symbol.isEmpty() || apiKey.isEmpty() || apiName.isEmpty()) {
-            return Optional.empty();
-        }
+    public String[] getRequestUrls() {
         FinancialApi api = buildApi();
-        return api != null ?
-                Optional.of(api.createRequestUrls(symbol, apiKey)) :
-                Optional.empty();
+        boolean invalid = symbol.isEmpty() || apiKey.isEmpty() || apiName.isEmpty() || api == null;
+        if (invalid) {
+            return new String[0];
+        }
+        return api.createRequestUrls(symbol, apiKey);
     }
 
     private FinancialApi buildApi() {

@@ -17,6 +17,7 @@ public class JsonKeySelectionTree {
         return jsonKeysTree;
     }
 
+    //TODO IMPROVE PARSING EFFICIENCY!!!
     public static class Builder {
         private final KeyTree<KeySelection> tree;
         private final Set<JSONObject> jsonObjects;
@@ -31,7 +32,7 @@ public class JsonKeySelectionTree {
             return this;
         }
 
-        public JsonKeySelectionTree parseObjectsAndCreateTree() {
+        public JsonKeySelectionTree parseObjectsToTree() {
             for (JSONObject jsonObject: jsonObjects) {
                 parseMapToTree(tree, jsonObject.toMap());
             }
@@ -84,7 +85,7 @@ public class JsonKeySelectionTree {
             this(key, false);
         }
 
-        public String getKey() {
+        public String key() {
             return key;
         }
 
@@ -100,7 +101,7 @@ public class JsonKeySelectionTree {
         public boolean equals(Object other) {
             if (other instanceof KeySelection) {
                 KeySelection otherKey = (KeySelection) other;
-                return key.equals(otherKey.getKey());
+                return key.equals(otherKey.key());
             }
             return false;
         }
