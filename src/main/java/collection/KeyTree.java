@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, Comparable<K> {
-    //TODO maybe implement Collection<KeyTree<K>> ? Maybe not...
 
     private final K key;
     private final KeyTree<K> parent;
@@ -19,7 +18,7 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, C
     }
 
     public static <K extends Comparable<K>> KeyTree<K> from(K key) {
-        return new KeyTree<K>(key, null, 0);
+        return new KeyTree<>(key, null, 0);
     }
 
     public KeyTree<K> getParent() {
@@ -28,6 +27,10 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, C
 
     public K getKey() {
         return key;
+    }
+
+    public int getLevel() {
+        return level;
     }
 
     public boolean addChildByKey(K key) {
@@ -89,9 +92,7 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, C
 
     public Set<K> keySet() {
         Set<K> keys = new HashSet<>();
-        forEach(tree -> {
-            keys.add(tree.key);
-        });
+        forEach(tree -> keys.add(tree.key));
         return keys;
     }
 
@@ -114,7 +115,7 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, C
         return breadthFirstIterator();
     }
 
-    public BreadthFirstKeyTreeIterator breadthFirstIterator() {
+    public Iterator<KeyTree<K>> breadthFirstIterator() {
         return new BreadthFirstKeyTreeIterator();
     }
 
@@ -135,6 +136,31 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, C
         public KeyTree<K> next() {
             KeyTree<K> current = queue.remove();
             queue.addAll(current.children);
+            return current;
+        }
+    }
+
+    public Iterator<KeyTree<K>> depthFirstKeyTreeIterator() {
+        return new DepthFirstKeyTreeIterator();
+    }
+
+    private class DepthFirstKeyTreeIterator implements Iterator<KeyTree<K>> {
+        private final Stack<KeyTree<K>> stack;
+
+        private DepthFirstKeyTreeIterator() {
+            stack = new Stack<>();
+            stack.push(KeyTree.this);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return ! stack.isEmpty();
+        }
+
+        @Override
+        public KeyTree<K> next() {
+            KeyTree<K> current = stack.pop();
+            stack.addAll(current.children);
             return current;
         }
     }

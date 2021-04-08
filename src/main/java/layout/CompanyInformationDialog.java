@@ -2,10 +2,12 @@ package layout;
 
 import api.ApiController;
 import api.FinancialApi;
+import collection.KeyTree;
 import file.ConfigData;
 import http.QueryHandler;
 import org.json.JSONObject;
-import parser.JsonTree;
+import parser.JsonKeySelectionTree;
+import parser.JsonKeySelectionTree.KeySelection;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +26,7 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     private final NavigatorAction navigatorAction;
     private final ApiController apiController;
     private final Map<String, List<ConfigData>> configs;
-    private JsonTree jsonTree;
+    private JsonKeySelectionTree jsonTree;
 
     public CompanyInformationDialog(NavigatorAction navigatorAction) {
         this.layout = new CompanyInformationLayout();
@@ -44,6 +46,10 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
         preloadApis();
         preloadConfigurations();
         loadConfigIntoLayout();
+
+        //TODO remove lines below later
+        symbolField.setText("IBM");
+        apiKeyField.setText("demo");
     }
 
     private void preloadApis() {
@@ -109,7 +115,7 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
         result.ifPresent(strings -> {
             QueryHandler queryHandler = new QueryHandler(result.get());
             String[] data = queryHandler.requestData();
-            JsonTree.Builder builder = new JsonTree.Builder("Parent");
+            JsonKeySelectionTree.Builder builder = new JsonKeySelectionTree.Builder("Parent");
             for (String jsonString: data) {
                 builder.addJsonObject(new JSONObject(jsonString));
             }
@@ -124,7 +130,7 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     }
 
     private void displayKeysForSelection() throws IOException {
-        Set<String> keySet = jsonTree.getTree().keySet();
+        Iterator<KeyTree<KeySelection>> iterator = jsonTree.getTree().depthFirstKeyTreeIterator();
         Set<String> preferenceKeySet = new HashSet<>();
         for (ConfigData configData: getMatchingConfigFiles()) {
             if (configData.getFileName().equals(getSelectedConfig())) {
@@ -132,19 +138,28 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
                 break;
             }
         }
-        if (!keySet.isEmpty()) {
-            int index = 0;
-            GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.gridx = index;
-            for (String key : keySet) {
-                gridBagConstraints.gridy = index++;
-                JCheckBox checkBox = new JCheckBox(key);
-                checkBox.setSelected(preferenceKeySet.contains(key));
-                keysPanel.add(checkBox, gridBagConstraints);
-            }
-            keysPanel.revalidate();
-            keysPanel.repaint();
+        int index = 0;
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = index;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1;
+        while (iterator.hasNext()) {
+            KeyTree<KeySelection> keySelectionKeyTree = iterator.next();
+            KeySelection keySelection = keySelectionKeyTree.getKey();
+            gridBagConstraints.gridy = index++;
+            JCheckBox checkBox = new JCheckBox(keySelection.getKey());
+            checkBox.setSelected(preferenceKeySet.contains(keySelection.getKey()));
+            checkBox.addActionListener(e -> {
+                keySelection.setSelected(checkBox.isSelected());
+                System.out.println(keySelection.getKey() + " selected? " + keySelection.isSelected());
+            });
+            int indentBy = keySelectionKeyTree.getLevel() + 1;
+            gridBagConstraints.insets = new java.awt.Insets(6, indentBy * 12, 0, 0);
+            keysPanel.add(checkBox, gridBagConstraints);
+            if(index == 20) break;
         }
+        keysPanel.revalidate();
+        keysPanel.repaint();
     }
 
     private Set<String> getSelectedKeys() {
