@@ -9,7 +9,6 @@ public class ConfigFileUtils {
 
     private static final String CONFIGS_PATH = "configs" + File.separator;
     private static final String CONFIG_INTERNAL_SEPARATOR = ",";
-    private static final String FIRST_FILE = "FIRST";
 
     private ConfigFileUtils() throws Exception {
         throw new Exception("Do not initialize util class!");
@@ -46,49 +45,6 @@ public class ConfigFileUtils {
             }
         }
         return configFiles;
-    }
-
-    public static Set<ConfigData> getConfigFilesByApi(String apiName) {
-        File configsDir = new File("configs");
-        Set<ConfigData> configFiles = new HashSet<>();
-        if (configsDir.isDirectory()) {
-            String[] files = configsDir.list();
-            if(files != null) {
-                for (String file: files) {
-                    String[] data = readConfigFile(file);
-                    // Minimum requirement for config file
-                    // -> containing a api name and key (length == 2)
-                    if (data.length >= 2) {
-                        ConfigData configData = buildConfigData(file, data);
-                        if (configData.getApiName().equals(apiName)) {
-                            configFiles.add(configData);
-                        }
-                    }
-                }
-
-            }
-        }
-        return configFiles;
-    }
-
-    public static Optional<ConfigData> getConfigFileByName(String fileName) {
-        File configsDir = new File("configs");
-        if(configsDir.isDirectory()) {
-            String[] files = configsDir.list();
-            if(files != null) {
-                for (String file: files) {
-                    if(fileName.equals(file) || fileName.equals(FIRST_FILE)) {
-                        String[] data = readConfigFile(fileName = file);
-                        // Minimum requirement for config file
-                        // -> containing a api name and key (length == 2)
-                        if (data.length >= 2) {
-                            return Optional.of(buildConfigData(fileName, data));
-                        }
-                    }
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     // READING WITH TRY-WITH-RESOURCES BLOCK!

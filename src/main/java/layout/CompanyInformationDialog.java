@@ -23,13 +23,14 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     private final CompanyInformationLayout layout;
     private final NavigatorAction navigatorAction;
     private final ApiController apiController;
-    private Map<String, List<ConfigData>> configs;
+    private final Map<String, List<ConfigData>> configs;
     private JsonTree jsonTree;
 
     public CompanyInformationDialog(NavigatorAction navigatorAction) {
         this.layout = new CompanyInformationLayout();
-        this.navigatorAction = navigatorAction;
         this.apiController = new ApiController();
+        this.navigatorAction = navigatorAction;
+        this.configs = new HashMap<>();
         init();
     }
 
@@ -53,14 +54,14 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     }
 
     private void preloadConfigurations() {
-        configs = getAllConfigFiles().stream()
-                .collect(Collectors.groupingBy(ConfigData::getApiName));
+        configs.putAll(getAllConfigFiles().stream()
+                .collect(Collectors.groupingBy(ConfigData::getApiName)));
     }
 
     private void loadConfigIntoLayout() {
         configComboBox.removeAllItems();
         configComboBox.addItem("<None>");
-        for (ConfigData configData: configs.get(getSelectedApiName())) {
+        for (ConfigData configData: getMatchingConfigFiles()) {
             configComboBox.addItem(configData.getFileName());
         }
     }
@@ -124,11 +125,13 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
 
     private void displayKeysForSelection() throws IOException {
         Set<String> keySet = jsonTree.getTree().keySet();
-        Optional<ConfigData> result = getConfigFileByName(apiController.getApiName());
-        Set<String> preferenceKeySet = result.isPresent() ?
-                result.get().getKeys() :
-                new HashSet<>();
-
+        Set<String> preferenceKeySet = new HashSet<>();
+        for (ConfigData configData: getMatchingConfigFiles()) {
+            if (configData.getFileName().equals(getSelectedConfig())) {
+                preferenceKeySet.addAll(configData.getKeys());
+                break;
+            }
+        }
         if (!keySet.isEmpty()) {
             int index = 0;
             GridBagConstraints gridBagConstraints = new GridBagConstraints();
@@ -168,7 +171,16 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
         apiController.setApiName(getSelectedApiName());
     }
 
+    private List<ConfigData> getMatchingConfigFiles() {
+        return configs.getOrDefault(getSelectedApiName(), Collections.emptyList());
+    }
+
     private String getSelectedApiName() {
         return apiComboBox.getItemAt(apiComboBox.getSelectedIndex());
     }
+
+    private String getSelectedConfig() {
+        return configComboBox.getItemAt(configComboBox.getSelectedIndex());
+    }
+
 }

@@ -3,20 +3,23 @@ package collection;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> { //TODO implement Collection?
+public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, Comparable<K> {
+    //TODO maybe implement Collection<KeyTree<K>> ? Maybe not...
 
     private final K key;
     private final KeyTree<K> parent;
     private final HashSet<KeyTree<K>> children;
+    private final int level;
 
-    private KeyTree(K key, KeyTree<K> parent) {
+    private KeyTree(K key, KeyTree<K> parent, int level) {
         this.key = key;
         this.parent = parent;
         this.children = new HashSet<>();
+        this.level = level;
     }
 
     public static <K extends Comparable<K>> KeyTree<K> from(K key) {
-        return new KeyTree<K>(key, null);
+        return new KeyTree<K>(key, null, 0);
     }
 
     public KeyTree<K> getParent() {
@@ -28,7 +31,8 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> { 
     }
 
     public boolean addChildByKey(K key) {
-        return !hasChildWithKey(key) && children.add(new KeyTree<>(key, this));
+        return !hasChildWithKey(key) && children.add(
+                new KeyTree<>(key, this, level + 1));
     }
 
     public boolean removeChildByKey(K key) {
@@ -91,34 +95,17 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>> { 
         return keys;
     }
 
-    //TODO outsource to other class
-    public List<KeyTree<K>> leaves() {
-        List<KeyTree<K>> leaves = new ArrayList<>();
-        forEach(tree -> {
-            if (tree.isLeaf())
-                leaves.add(tree);
-        });
-        return leaves;
-    }
-
-    //TODO outsource to other class
-    //TODO improve -> method to get path from root parent to this!!!
-    public List<K> getPath() {
-        ArrayList<K> path = new ArrayList<>();
-        KeyTree<K> currentTree = this;
-        do {
-            path.add(currentTree.key);
-            currentTree = this.parent;
-        } while(currentTree != null);
-        return path;
+    @Override
+    public int compareTo(K other) {
+        return key.compareTo(other);
     }
 
     @Override
     public String toString() {
         if (parent != null) {
-            return "[" + parent.key + "->" + this.key + "]";
+            return "[key=" + this.key + ", level=" + level + ", parent=" + parent.key + "]";
         } else {
-            return "[" + this.key + "]";
+            return "[key=" + this.key + ", level=" + level + "]";
         }
     }
 
