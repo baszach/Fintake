@@ -34,7 +34,7 @@ public class ConfigData {
     }
 
     public Set<String> getKeys() {
-        return keys;
+        return new HashSet<>(keys);
     }
 
     public void addKeyToConfig(String key) {

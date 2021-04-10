@@ -3,6 +3,9 @@ package api;
 public enum FinancialApi {
 
     AlphaVantage {
+        private final ApiService OVERVIEW_SERVICE = new ApiService("overview");
+        
+
         public String[] createRequestUrls(String symbol, String apiKey) {
             String overview = "https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + symbol + "&apikey=" + apiKey;
             String incomeStatement = "https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=" + symbol + "&apikey=" + apiKey;

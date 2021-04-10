@@ -17,7 +17,7 @@ public class JsonKeySelectionTree {
         return jsonKeysTree;
     }
 
-    //TODO IMPROVE PARSING EFFICIENCY!!!
+    //TODO IMPROVE PARSING LOGIC!!!
     public static class Builder {
         private final KeyTree<KeySelection> tree;
         private final Set<JSONObject> jsonObjects;
@@ -53,6 +53,8 @@ public class JsonKeySelectionTree {
             });
         }
 
+        //TODO Maybe remove index solution. It's bad. Instead just display the reoccurring keys
+        // from a JSONArray?
         private void parseJsonArray(KeyTree<KeySelection> tree, List<?> list, String key) {
             for (int i = 0; i < list.size(); i++) {
                 Object value = list.get(i);
@@ -99,11 +101,10 @@ public class JsonKeySelectionTree {
 
         @Override
         public boolean equals(Object other) {
-            if (other instanceof KeySelection) {
-                KeySelection otherKey = (KeySelection) other;
-                return key.equals(otherKey.key());
-            }
-            return false;
+            if (this == other) return true;
+            if (other == null || getClass() != other.getClass()) return false;
+            KeySelection that = (KeySelection) other;
+            return Objects.equals(key, that.key);
         }
 
         @Override

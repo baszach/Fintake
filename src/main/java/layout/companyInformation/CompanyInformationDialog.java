@@ -1,4 +1,4 @@
-package layout;
+package layout.companyInformation;
 
 import api.ApiController;
 import api.FinancialApi;
@@ -18,17 +18,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static file.ConfigFileUtils.*;
-import static parser.JsonKeySelectionTree.*;
 
-public class CompanyInformationDialog extends CompanyInformationLayout {
+public class CompanyInformationDialog {
+    //TODO Add cache for performed queries (capacity maybe 3-5 query results)
+    //TODO break down code into methods (each method does ONE activity -> no parsing and querying
+    // in the same method!)
+    //TODO write classes for wrapping information (e.g. a QueryInfo object may hold api and api key)
+
 
     private final CompanyInformationLayout layout;
-    private final NavigatorAction navigatorAction;
+    private final CompanyInformationNavigator navigatorAction;
     private final ApiController apiController;
     private final Map<String, List<ConfigData>> configs;
     private JsonKeySelectionTree jsonTree;
 
-    public CompanyInformationDialog(NavigatorAction navigatorAction) {
+    public CompanyInformationDialog(CompanyInformationNavigator navigatorAction) {
         this.layout = new CompanyInformationLayout();
         this.apiController = new ApiController();
         this.navigatorAction = navigatorAction;
@@ -41,21 +45,21 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     }
 
     private void init() {
-        nextButton.setEnabled(false);
+        layout.nextButton.setEnabled(false);
         setActionListeners();
         preloadApis();
         preloadConfigurations();
         loadConfigIntoLayout();
 
         //TODO remove lines below later
-        symbolField.setText("IBM");
-        apiKeyField.setText("demo");
+        layout.symbolField.setText("IBM");
+        layout.apiKeyField.setText("demo");
     }
 
     private void preloadApis() {
-        apiComboBox.removeAllItems();
+        layout.apiComboBox.removeAllItems();
         for (FinancialApi api: FinancialApi.values()) {
-            apiComboBox.addItem(api.name());
+            layout.apiComboBox.addItem(api.name());
         }
     }
 
@@ -65,70 +69,67 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     }
 
     private void loadConfigIntoLayout() {
-        configComboBox.removeAllItems();
-        configComboBox.addItem("<None>");
+        layout.configComboBox.removeAllItems();
+        layout.configComboBox.addItem("<None>");
         for (ConfigData configData: getMatchingConfigFiles()) {
-            configComboBox.addItem(configData.getFileName());
+            layout.configComboBox.addItem(configData.getFileName());
         }
     }
 
     private void setActionListeners() {
-        queryButton.addActionListener(this::queryAndDisplayKeys);
+        layout.queryButton.addActionListener(this::queryAndDisplayKeys);
         //TODO put listener actions in extra methods
-        nextButton.addActionListener(e -> {
+        layout.nextButton.addActionListener(e -> {
             //TODO give selected keys (or whole tree) to next dialog
-            navigatorAction.nextAction();
+            navigatorAction.next(getMatchingConfigFiles(), jsonTree);
         });
-        apiComboBox.addActionListener(e -> {
-            Object item = apiComboBox.getSelectedItem();
+        layout.apiComboBox.addActionListener(e -> {
+            Object item = layout.apiComboBox.getSelectedItem();
             if (item != null) {
                 loadConfigIntoLayout();
             }
         });
-        configComboBox.addActionListener(e -> {
-            Object item = configComboBox.getSelectedItem();
+        layout.configComboBox.addActionListener(e -> {
+            Object item = layout.configComboBox.getSelectedItem();
             if (item instanceof ConfigData) {
                 ConfigData configData = (ConfigData) item;
-                apiKeyField.setText(configData.getApiKey());
+                layout.apiKeyField.setText(configData.getApiKey());
             }
         });
     }
 
     private void queryAndDisplayKeys(ActionEvent event) {
-        if(startQuery()) {
+        String[] data = queryForData();
+        if(data.length > 0) {
             try {
+                storeKeysInTree(data);
                 displayKeysForSelection();
-                nextButton.setEnabled(true);
+                layout.nextButton.setEnabled(true);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "The querying process failed!");
+                JOptionPane.showMessageDialog(layout, "The parsing process failed!");
                 ex.printStackTrace();
             }
         } else {
-            JOptionPane.showMessageDialog(this, "The querying process failed!");
+            JOptionPane.showMessageDialog(layout, "The querying process failed!");
         }
     }
 
-    private boolean startQuery() {
+    private String[] queryForData() {
         updateApiControllerFields();
         String[] urls = apiController.getRequestUrls();
-        boolean querySuccessful = false;
         QueryHandler queryHandler = new QueryHandler(urls);
-        String[] data = queryHandler.requestData();
-        Builder builder = new Builder("Data");
+        return queryHandler.requestData();
+    }
+
+    private void storeKeysInTree(String[] data) {
+        JsonKeySelectionTree.Builder builder = new JsonKeySelectionTree.Builder("Data");
         for (String jsonString: data) {
             builder.addJsonObject(new JSONObject(jsonString));
         }
-        try {
-            jsonTree = builder.parseObjectsToTree();
-            querySuccessful = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return querySuccessful;
+        jsonTree = builder.parseObjectsToTree();
     }
 
     private void displayKeysForSelection() throws IOException {
-        Iterator<KeyTree<KeySelection>> iterator = jsonTree.getTree().depthFirstKeyTreeIterator();
         Set<String> preferenceKeySet = new HashSet<>();
         for (ConfigData configData: getMatchingConfigFiles()) {
             if (configData.getFileName().equals(getSelectedConfig())) {
@@ -137,20 +138,27 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
             }
         }
         int index = 0;
-        while (iterator.hasNext()) {
+        for (Iterator<KeyTree<KeySelection>> iterator = jsonTree.getTree().depthFirstKeyTreeIterator();
+             iterator.hasNext();
+             index++) {
             KeyTree<KeySelection> keySelectionKeyTree = iterator.next();
             KeySelection keySelection = keySelectionKeyTree.getKey();
-            JCheckBox checkBox = new JCheckBox(keySelection.key());
-            checkBox.setSelected(preferenceKeySet.contains(keySelection.key()));
-            checkBox.addActionListener(e -> {
-                keySelection.setSelected(checkBox.isSelected());
-            });
+            JComponent keyComponent;
+            if (keySelectionKeyTree.isLeaf()) {
+                keyComponent = new JCheckBox(keySelection.key());
+                ((JCheckBox) keyComponent).setSelected(preferenceKeySet.contains(keySelection.key()));
+                ((JCheckBox) keyComponent).addActionListener(e -> {
+                    keySelection.setSelected(((JCheckBox) keyComponent).isSelected());
+                });
+            } else {
+                keyComponent = new JLabel(keySelection.key());
+            }
             int insetBy = keySelectionKeyTree.getLevel() + 1;
-            GridBagConstraints gridBagConstraints = generateConstraints(index++, insetBy);
-            keysPanel.add(checkBox, gridBagConstraints);
+            GridBagConstraints gridBagConstraints = generateConstraints(index, insetBy);
+            layout.keysPanel.add(keyComponent, gridBagConstraints);
         }
-        keysPanel.revalidate();
-        keysPanel.repaint();
+        layout.keysPanel.revalidate();
+        layout.keysPanel.repaint();
     }
 
     private GridBagConstraints generateConstraints(int yIndex, int insetFactor) {
@@ -164,8 +172,8 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     }
 
     private void updateApiControllerFields() {
-        apiController.setSymbol(symbolField.getText());
-        apiController.setApiKey(apiKeyField.getText());
+        apiController.setSymbol(layout.symbolField.getText());
+        apiController.setApiKey(layout.apiKeyField.getText());
         apiController.setApiName(getSelectedApiName());
     }
 
@@ -174,11 +182,11 @@ public class CompanyInformationDialog extends CompanyInformationLayout {
     }
 
     private String getSelectedApiName() {
-        return apiComboBox.getItemAt(apiComboBox.getSelectedIndex());
+        return layout.apiComboBox.getItemAt(layout.apiComboBox.getSelectedIndex());
     }
 
     private String getSelectedConfig() {
-        return configComboBox.getItemAt(configComboBox.getSelectedIndex());
+        return layout.configComboBox.getItemAt(layout.configComboBox.getSelectedIndex());
     }
 
 }

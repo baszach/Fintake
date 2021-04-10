@@ -7,13 +7,13 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, C
 
     private final K key;
     private final KeyTree<K> parent;
-    private final HashSet<KeyTree<K>> children;
+    private final Set<KeyTree<K>> children;
     private final int level;
 
     private KeyTree(K key, KeyTree<K> parent, int level) {
         this.key = key;
         this.parent = parent;
-        this.children = new HashSet<>();
+        this.children = new LinkedHashSet<>();
         this.level = level;
     }
 
@@ -103,11 +103,13 @@ public class KeyTree<K extends Comparable<K>> implements Iterable<KeyTree<K>>, C
 
     @Override
     public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[key=").append(this.key)
+                .append(", level=").append(level);
         if (parent != null) {
-            return "[key=" + this.key + ", level=" + level + ", parent=" + parent.key + "]";
-        } else {
-            return "[key=" + this.key + ", level=" + level + "]";
+            builder.append(", parent=").append(parent.key);
         }
+        return builder.append("]").toString();
     }
 
     @Override
