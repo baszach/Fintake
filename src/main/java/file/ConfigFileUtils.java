@@ -2,7 +2,6 @@ package file;
 
 import java.io.*;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 public class ConfigFileUtils {
@@ -14,17 +13,19 @@ public class ConfigFileUtils {
         throw new Exception("Do not initialize util class!");
     }
 
-    public static void createAndSaveConfigFile(ConfigData configData) throws IOException {
+    public static void createAndSaveConfigFile(ConfigData configData) {
         StringBuilder builder = new StringBuilder();
         builder.append(configData.getApiName())
                 .append(",").append(configData.getApiKey());
         for (String key : configData.getKeys()) {
             builder.append(",").append(key);
         }
-        FileWriter fileWriter = new FileWriter(CONFIGS_PATH + configData.getApiName());
-        fileWriter.write(builder.toString());
-        fileWriter.flush();
-        fileWriter.close();
+        try (FileWriter fileWriter = new FileWriter(CONFIGS_PATH + configData.getFileName())) {
+            fileWriter.write(builder.toString());
+            fileWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Set<ConfigData> getAllConfigFiles() {
@@ -47,9 +48,8 @@ public class ConfigFileUtils {
         return configFiles;
     }
 
-    // READING WITH TRY-WITH-RESOURCES BLOCK!
     //TODO consider using Stream with: Stream<String> config = Files.lines(path)
-    private static String[] readConfigFile(String fileName)  {
+    private static String[] readConfigFile(String fileName) {
         File configFile =  new File(CONFIGS_PATH + fileName);
         StringBuilder builder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {

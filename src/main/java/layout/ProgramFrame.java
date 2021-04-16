@@ -1,6 +1,7 @@
 package layout;
 
 import file.ConfigData;
+import http.Query;
 import layout.companyInformation.CompanyInformationDialog;
 import layout.companyInformation.CompanyInformationNavigator;
 import layout.previewCsv.PreviewCsvDialog;
@@ -27,10 +28,9 @@ public class ProgramFrame extends JFrame {
     }
 
     private final CompanyInformationNavigator COMPANY_INFORMATION_NAVIGATOR = new CompanyInformationNavigator() {
-        //TODO choose correct parameters to give to next dialog!
         @Override
-        public void next(List<ConfigData> configs, JsonKeySelectionTree jsonTree) {
-            previewCsvDialog = new PreviewCsvDialog(configs, jsonTree, PREVIEW_CSV_NAVIGATOR);
+        public void nextDialog(JsonKeySelectionTree jsonTree, List<ConfigData> configs, Query query) {
+            previewCsvDialog = new PreviewCsvDialog(jsonTree, configs, query, PREVIEW_CSV_NAVIGATOR);
             add(previewCsvDialog.getDialogLayout());
             remove(companyInfoDialog.getDialogLayout());
             revalidate();

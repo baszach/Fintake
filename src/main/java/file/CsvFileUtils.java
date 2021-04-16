@@ -17,10 +17,10 @@ public class CsvFileUtils {
 
     // WRITING WITH TRY-WITH-RESOURCES BLOCK!
     public static void createAndSaveCsvFile(CsvData csvData, String fileName) {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(CSV_PATH + fileName))) {
-            Map<String, Object> map = csvData.map;
-            map.forEach((s, o) -> {
-                String[] line = {s, o.toString()};
+        try (CSVWriter writer = new CSVWriter(new FileWriter(CSV_PATH + fileName + ".csv"))) {
+            Map<String, String> map = csvData.map;
+            map.forEach((k, v) -> {
+                String[] line = {k, v};
                 writer.writeNext(line);
             });
             writer.flush();

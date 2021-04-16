@@ -4,9 +4,9 @@ import java.util.Map;
 
 public class CsvData {
 
-    Map<String, Object> map;
+    Map<String, String> map;
 
-    public CsvData(Map<String, Object> map) {
+    public CsvData(Map<String, String> map) {
         this.map = map;
     }
 }

@@ -1,54 +1,37 @@
 package api;
 
+import http.Query;
+
 public class ApiController {
 
-    private String symbol;
-    private String apiKey;
-    private String apiName;
+    private Query query;
 
     public ApiController() {
-        symbol = "";
-        apiKey = "";
-        apiName = "";
+        this.query = null;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public Query getQuery() {
+        return query;
     }
 
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public String getApiName() {
-        return apiName;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public void setApiName(String apiName) {
-        this.apiName = apiName;
+    public void setQuery(Query query) {
+        this.query = query;
     }
 
     public String[] getRequestUrls() {
         FinancialApi api = buildApi();
-        boolean invalid = symbol.isEmpty() || apiKey.isEmpty() || apiName.isEmpty() || api == null;
+        boolean invalid = query.getSymbol().isEmpty() || query.getApiKey().isEmpty()
+                || query.getApiName().isEmpty() || api == null;
         if (invalid) {
             return new String[0];
         }
-        return api.createRequestUrls(symbol, apiKey);
+        return api.createRequestUrls(query.getSymbol(), query.getApiKey());
     }
 
     private FinancialApi buildApi() {
         for (FinancialApi api: FinancialApi.values()) {
-            if (api.isApi(apiName)) {
-                return FinancialApi.valueOf(apiName);
+            if (api.isApi(query.getApiName())) {
+                return FinancialApi.valueOf(query.getApiName());
             }
         }
         return null;
